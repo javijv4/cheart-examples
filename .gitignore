@@ -1,0 +1,4 @@
+*.D
+**__pycache__
+**.egg-info
+*.vtu

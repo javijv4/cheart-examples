@@ -1,0 +1,71 @@
+% ----  File description  -----------------------------------------------------------------
+% This file runs a simple proble where a cube gets stretched using dirichlet conditions. 
+
+
+% ----    General stuff   -----------------------------------------------------------------
+% This space is use to set general things
+
+#outdir = out             % variable to set where the results will be saved. Remember to create the folder !!            
+!SetOutputPath={#outdir}  % CH-command to set where the results will be saved
+
+
+% ----  Solver Groups  -------------------------------------------------------------------
+% This is where the solver is defined. We will skip this for now
+
+!DefSolverGroup={SG1|null|SolidMatrix}
+  !SetSolverGroup={SG1|export_initial_condition}
+  !SetSolverGroup={SG1|L2TOL|1e-8}
+  !SetSolverGroup={SG1|L2PERCENT|1e-8}
+!DefSolverSubGroup={SG1|seq_fp_linesearch|SolidMatrix}
+
+!DefSolverMatrix={SolidMatrix|SOLVER_MUMPS|Solid}
+  !SetSolverMatrix={SolidMatrix|SolverMatrixCalculation|evaluate_every_build}
+ 
+
+% ----  Basis Functions  -----------------------------------------------------------------
+% This is where your basis functions are defined. Note that we are giving it a 
+% TETRAHEDRAL_ELEMENT because the mesh is made of tetrahedrons. Basis are defined as
+% !UseBasis={name of basis | type of element | type of basis - order of the basis | type of quadrature - order of the quadrature}
+
+!UseBasis={LinBasis|TETRAHEDRAL_ELEMENT|NODAL_LAGRANGE1|GAUSS_LEGENDRE9}
+
+
+% ----  Topologies  ----------------------------------------------------------------------
+% This is where your topologies are defined. Note that we need to point to our mesh and 
+% give it the correct(!) basis. Topologies are defined as
+% !UseTopology={name of topology | path to topology (.X, .T, .B files) | basis}
+
+!DefTopology={TP1|mesh/cube|LinBasis}
+
+
+% ----  Variables  -----------------------------------------------------------------------
+% This is where your variables are defined. Variables are defined as
+% !DefVariablePointer={name of variable | topology | (optional) file pointer | variable dimension }
+
+!DefVariablePointer={Space|TP1|mesh/cube|3}  
+!DefVariablePointer={Disp|TP1|3}
+
+
+% ----  Export Frequency  ----------------------------------------------------------------
+% These are options to set the frequency at which the results are saved. It is defined as
+% !SetExportFrequency={variable | -1} where -1 means that the results are never saved
+% !SetExportFrequency={variable | 1} means that the results are saved every iteration
+% !SetExportFrequency={variable | 0} means that the results are saved only at the beginning
+
+!SetExportFrequency={Space|-1}
+
+
+% ----  Problem Definitions  -------------------------------------------------------------
+% This is where the problem is defined.
+
+!DefProblem={Solid|quasi_static_elasticity}         % {name of problem | type of problem}
+  !UseVariablePointer={Space|Space}                 % Mandatory variable 1: Space
+  !UseVariablePointer={Displacement|Disp}           % Mandatory variable 2: Displacement
+  !ConstitutiveLaw={neohookean-compressible}        % Constitutive law
+    10                                              % Material parameter
+  !ConstitutiveLaw={compressible}                   % Compressibility Constitutive law   
+    100 100                                            % Material parameter             
+
+  !Boundary-patch-definitions                       % Boundary conditions
+    1  Disp     dirichlet  0  0  0                  % The patch 1 is fixed in all directions
+    2  Disp.1   dirichlet  0.1                      % The patch 2 is stretched in the X direction 

@@ -1,0 +1,27 @@
+[project]
+name = "cheart-examples"
+version = "0.0.0"
+authors = [
+  { name="Javiera Jilberto", email="jilberto@umich.edu" },
+]
+description = "A series of solid mechanics CHeart examples"
+readme = "README.md"
+license = { file="LICENSE" }
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+  "meshio>=5.3",
+  "tqdm>=4.60",
+  "matplotlib"
+]
+
+[project.entry-points.console_scripts]
+ch-utils = "_cli:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

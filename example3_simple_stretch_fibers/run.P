@@ -1,0 +1,75 @@
+#outdir = out
+
+!SetOutputPath={#outdir}
+
+% ----  Solver Groups  -------------------------------------------------------------------
+!DefSolverGroup={SG1|time|SolidMatrix}
+  !SetSolverGroup={SG1|export_initial_condition}
+  !SetSolverGroup={SG1|L2TOL|1e-8}
+  !SetSolverGroup={SG1|L2PERCENT|1e-8}
+!DefSolverSubGroup={SG1|seq_fp_linesearch|SolidMatrix}
+
+!DefSolverMatrix={SolidMatrix|SOLVER_MUMPS|Solid}
+ !SetSolverMatrix={SolidMatrix|SolverMatrixCalculation|evaluate_every_build}
+
+!DefTimeStepScheme={time}
+  1  10  0.1
+
+% ----  Basis Functions  -----------------------------------------------------------------
+!UseBasis={LinBasis|TETRAHEDRAL_ELEMENT|NODAL_LAGRANGE1|GAUSS_LEGENDRE9}
+!UseBasis={QuadBasis|TETRAHEDRAL_ELEMENT|NODAL_LAGRANGE2|GAUSS_LEGENDRE9}
+
+% ----  Topologies  ----------------------------------------------------------------------
+!DefTopology={TP1|mesh/cube|LinBasis}
+!DefTopology={TP2|mesh/cube_quad|QuadBasis}
+
+% ----  Interfaces  ----------------------------------------------------------------------
+!DefInterface={OneToOne|TP1|TP2}
+
+% ----  Variables  -----------------------------------------------------------------------
+!DefVariablePointer={Space|TP2|mesh/cube_quad|3}
+!DefVariablePointer={Disp|TP2|3}
+!DefVariablePointer={Pres|TP1|1}
+!DefVariablePointer={fibers|TP2|9}
+    !SetVariablePointer={fibers|init_expr|fiber_expr}
+
+% ----  Export Frequency  ----------------------------------------------------------------
+!SetExportFrequency={Space|-1}
+!SetExportFrequency={fibers|0}
+
+% ----  Expressions  ----------------------------------------------------------------
+!DefExpression={bdisp_expr}
+    1*t
+
+!DefExpression={pi}
+    3.14159265359
+
+!DefExpression={fib_dir}
+  cos(pi/10)
+  sin(pi/10)
+  0
+
+!DefExpression={fiber_expr}
+    fib_dir.1
+    fib_dir.2
+    fib_dir.3
+    -fib_dir.2
+    fib_dir.1
+    fib_dir.3
+    0
+    0
+    1
+
+
+% ----  Problem Definitions  -------------------------------------------------------------
+!DefProblem={Solid|quasi_static_elasticity}
+  !UseVariablePointer={Space|Space}
+  !UseVariablePointer={Displacement|Disp}
+  !UseVariablePointer={Pressure|Pres}
+  !UseVariablePointer={Fibers|fibers}
+  !ConstitutiveLaw={holzapfel-ogden}
+    0.1 5 1 5 0 0 0 0
+
+  !Boundary-patch-definitions
+    1  Disp  Dirichlet  0  0  0
+    2  Disp   scaled_normal  bdisp_expr
