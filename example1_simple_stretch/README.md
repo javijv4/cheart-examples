@@ -1,4 +1,4 @@
-This file runs a simple proble where a cube gets stretched using dirichlet conditions. 
+This file runs a simple problem where a cube gets stretched using dirichlet conditions. 
 
 To run, do (remember to change `ncores` for whatever number of cores you want to use)
 ```
