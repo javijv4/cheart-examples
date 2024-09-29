@@ -69,6 +69,8 @@
   !UseVariablePointer={Fibers|fibers}
   !ConstitutiveLaw={holzapfel-ogden}
     0.1 5 1 5 0 0 0 0
+  !Nearly-incompressible
+    100
 
   !Boundary-patch-definitions
     1  Disp  Dirichlet  0  0  0

@@ -5,6 +5,8 @@
 % ----    General stuff   -----------------------------------------------------------------
 % This space is use to set general things
 
+#stretch_value = 0.1      % This is setting a variable that will be used later
+
 #outdir = out             % variable to set where the results will be saved. Remember to create the folder !!            
 !SetOutputPath={#outdir}  % CH-command to set where the results will be saved
 
@@ -68,4 +70,4 @@
 
   !Boundary-patch-definitions                       % Boundary conditions
     1  Disp     dirichlet  0  0  0                  % The patch 1 is fixed in all directions
-    2  Disp.1   dirichlet  0.1                      % The patch 2 is stretched in the X direction 
+    2  Disp.1   dirichlet  #stretch_value                      % The patch 2 is stretched in the X direction 
