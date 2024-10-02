@@ -16,5 +16,5 @@ In bigblue you won't be able to visualize the results. So you will need to copy 
 1. Navigate to the folder the example1 folder in your computer (use `cd` to move to the folder)
 2. Do (remember to change `username` and don't forget the `.` at the end)
 ```
-rsync -r username@bigblue.engin.umich.edu:/home/username/cheart-examples/example1_simple_stretch/out . 
+rsync -r username@orca.engin.umich.edu:/home/username/cheart-examples/example1_simple_stretch/out . 
 ```
