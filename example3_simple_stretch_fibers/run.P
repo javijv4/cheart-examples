@@ -1,8 +1,23 @@
-#outdir = out
+% ----  File description  -----------------------------------------------------------------
+% This file stretches a cube using expressions
 
-!SetOutputPath={#outdir}
+
+% ----    General stuff   -----------------------------------------------------------------
+% This space is use to set general things
+
+#press_value = 0.1      % This is setting a variable that will be used later
+
+#outdir = out             % variable to set where the results will be saved. Remember to create the folder !!            
+!SetOutputPath={#outdir}  % CH-command to set where the results will be saved
+
+% time scheme
+#st=1
+#et=10
+#dt=1
 
 % ----  Solver Groups  -------------------------------------------------------------------
+% This is where the solver is defined. The only thing we care for now is the time scheme definition
+
 !DefSolverGroup={SG1|time|SolidMatrix}
   !SetSolverGroup={SG1|export_initial_condition}
   !SetSolverGroup={SG1|L2TOL|1e-8}
@@ -10,43 +25,73 @@
 !DefSolverSubGroup={SG1|seq_fp_linesearch|SolidMatrix}
 
 !DefSolverMatrix={SolidMatrix|SOLVER_MUMPS|Solid}
- !SetSolverMatrix={SolidMatrix|SolverMatrixCalculation|evaluate_every_build}
+  !SetSolverMatrix={SolidMatrix|SolverMatrixCalculation|evaluate_every_build}
+ 
+!DefTimeStepScheme={time}   % This defines the time scheme
+  #st  #et  #dt             % start timestep, end timestep, timestep increment
 
-!DefTimeStepScheme={time}
-  1  10  0.1
 
 % ----  Basis Functions  -----------------------------------------------------------------
+% This is where your basis functions are defined. Note that we are giving it a 
+% TETRAHEDRAL_ELEMENT because the mesh is made of tetrahedrons. Basis are defined as
+% !UseBasis={name of basis | type of element | type of basis - order of the basis | type of quadrature - order of the quadrature}
+
 !UseBasis={LinBasis|TETRAHEDRAL_ELEMENT|NODAL_LAGRANGE1|GAUSS_LEGENDRE9}
 !UseBasis={QuadBasis|TETRAHEDRAL_ELEMENT|NODAL_LAGRANGE2|GAUSS_LEGENDRE9}
 
+
 % ----  Topologies  ----------------------------------------------------------------------
+% This is where your topologies are defined. Note that we need to point to our mesh and 
+% give it the correct(!) basis. Topologies are defined as
+% !UseTopology={name of topology | path to topology (.X, .T, .B files) | basis}
+
 !DefTopology={TP1|mesh/cube|LinBasis}
 !DefTopology={TP2|mesh/cube_quad|QuadBasis}
 
+
 % ----  Interfaces  ----------------------------------------------------------------------
+% This is where your interfaces are defined. Interfaces tell CHeart how two topologies are related. 
+% Interfaces are defined as
+% !DefInterface={name of interface | topology 1 | topology 2}
+
 !DefInterface={OneToOne|TP1|TP2}
 
+
 % ----  Variables  -----------------------------------------------------------------------
-!DefVariablePointer={Space|TP2|mesh/cube_quad|3}
+% This is where your variables are defined. Variables are defined as
+% !DefVariablePointer={name of variable | topology | (optional) file pointer | variable dimension }
+
+!DefVariablePointer={Space|TP2|mesh/cube_quad|3}  
 !DefVariablePointer={Disp|TP2|3}
 !DefVariablePointer={Pres|TP1|1}
 !DefVariablePointer={fibers|TP2|9}
     !SetVariablePointer={fibers|init_expr|fiber_expr}
 
+
 % ----  Export Frequency  ----------------------------------------------------------------
+% These are options to set the frequency at which the results are saved. It is defined as
+% !SetExportFrequency={variable | -1} where -1 means that the results are never saved
+% !SetExportFrequency={variable | 1} means that the results are saved every iteration
+% !SetExportFrequency={variable | 0} means that the results are saved only at the beginning
+
 !SetExportFrequency={Space|-1}
 !SetExportFrequency={fibers|0}
 
-% ----  Expressions  ----------------------------------------------------------------
-!DefExpression={bdisp_expr}
-    1*t
+
+% ---------  Expressions  ----------------------------------------------------------------
+% This is where you define expressions. Expressions are defined as 
+% !DefExpression={name of expression}
+%     value_of_expression
+
+!DefExpression={bpres_expr}
+    #press_value*t
 
 !DefExpression={pi}
     3.14159265359
 
 !DefExpression={fib_dir}
-  cos(pi/10)
-  sin(pi/10)
+  cos(pi/6)
+  sin(pi/6)
   0
 
 !DefExpression={fiber_expr}
@@ -60,18 +105,18 @@
     0
     1
 
-
 % ----  Problem Definitions  -------------------------------------------------------------
-!DefProblem={Solid|quasi_static_elasticity}
-  !UseVariablePointer={Space|Space}
-  !UseVariablePointer={Displacement|Disp}
-  !UseVariablePointer={Pressure|Pres}
-  !UseVariablePointer={Fibers|fibers}
-  !ConstitutiveLaw={holzapfel-ogden}
-    0.1 5 1 5 0 0 0 0
-  !Nearly-incompressible
-    100
+% This is where the problem is defined.
 
-  !Boundary-patch-definitions
-    1  Disp  Dirichlet  0  0  0
-    2  Disp   scaled_normal  bdisp_expr
+!DefProblem={Solid|quasi_static_elasticity}         % {name of problem | type of problem}
+  !UseVariablePointer={Space|Space}                 % Mandatory variable 1: Space
+  !UseVariablePointer={Displacement|Disp}           % Mandatory variable 2: Displacement
+  !UseVariablePointer={Pressure|Pres}               % Mandatory variable 3 (if using nearly-incompressible): Pressure
+  !ConstitutiveLaw={neohookean-compressible}        % Constitutive law
+    10                                              % Material parameter
+  !Nearly-incompressible                            % Another type of material
+    100  
+
+  !Boundary-patch-definitions                       % Boundary conditions
+    1  Disp     dirichlet  0  0  0                  % The patch 1 is fixed in all directions
+    2  Disp.1   scaled_normal  bpres_expr               % The patch 2 is stretched in the X direction 
