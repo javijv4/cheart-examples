@@ -118,19 +118,19 @@
   !UseVariablePointer={Space|Space}                 % Mandatory variable 1: Space
   !UseVariablePointer={Displacement|Disp}           % Mandatory variable 2: Displacement
   !UseVariablePointer={Pressure|Pres}               % Mandatory variable 3 (if using nearly-incompressible): Pressure
-  !UseVariablePointer={Fibers|fibers}
-  !ConstitutiveLaw={holzapfel-ogden}
-    0.1 5 1 5 0 0 0 0
-  !Nearly-incompressible
-    100
+  !UseVariablePointer={Fibers|Fibers}               % Mandatory variable 4 (if using a material law that uses fibers): Fibers
+  !ConstitutiveLaw={holzapfel-ogden}                % Constitutive law
+    1 5 1 5 0 0 0 0                                 % Material parameter
+  !Nearly-incompressible                            % Another type of material
+    100         
 
-  !Boundary-patch-definitions
-    1  Disp  Dirichlet  0  0  0
-    2  Disp   scaled_normal  bdisp_expr
+  !Boundary-patch-definitions                       % Boundary conditions
+    1  Disp     dirichlet  0  0  0                  % The patch 1 is fixed in all directions
+    2  Disp.1   scaled_normal  bpres_expr               % The patch 2 is stretched in the X direction 
 
 
 %  ---  Compute Stretch Problem Definition  --------------------------------------------
-!DefProblem={FibStrainCalc|l2solidprojection_problem}
+!DefProblem={FibStretchCalc|l2solidprojection_problem}
   !UseVariablePointer={Space|Space}
   !UseVariablePointer={Variable|FibStretch}
   !Mechanical-Problem={solid}

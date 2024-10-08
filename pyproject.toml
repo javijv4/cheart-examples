@@ -16,7 +16,8 @@ classifiers = [
 dependencies = [
   "meshio>=5.3",
   "tqdm>=4.60",
-  "matplotlib"
+  "matplotlib",
+  "scipy"
 ]
 
 [project.entry-points.console_scripts]

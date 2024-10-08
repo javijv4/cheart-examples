@@ -64,8 +64,8 @@
 !DefVariablePointer={Space|TP2|mesh/cube_quad|3}  
 !DefVariablePointer={Disp|TP2|3}
 !DefVariablePointer={Pres|TP1|1}
-!DefVariablePointer={fibers|TP2|9}
-    !SetVariablePointer={fibers|init_expr|fiber_expr}
+!DefVariablePointer={Fibers|TP2|9}
+    !SetVariablePointer={Fibers|init_expr|fiber_expr}
 
 
 % ----  Export Frequency  ----------------------------------------------------------------
@@ -112,10 +112,11 @@
   !UseVariablePointer={Space|Space}                 % Mandatory variable 1: Space
   !UseVariablePointer={Displacement|Disp}           % Mandatory variable 2: Displacement
   !UseVariablePointer={Pressure|Pres}               % Mandatory variable 3 (if using nearly-incompressible): Pressure
-  !ConstitutiveLaw={neohookean-compressible}        % Constitutive law
-    10                                              % Material parameter
+  !UseVariablePointer={Fibers|Fibers}               % Mandatory variable 4 (if using a material law that uses fibers): Fibers
+  !ConstitutiveLaw={holzapfel-ogden}                % Constitutive law
+    1 5 1 5 0 0 0 0                                 % Material parameter
   !Nearly-incompressible                            % Another type of material
-    100  
+    100         
 
   !Boundary-patch-definitions                       % Boundary conditions
     1  Disp     dirichlet  0  0  0                  % The patch 1 is fixed in all directions
