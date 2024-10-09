@@ -16,6 +16,7 @@ classifiers = [
 dependencies = [
   "meshio>=5.3",
   "tqdm>=4.60",
+  "PyQt6",
   "matplotlib",
   "scipy"
 ]

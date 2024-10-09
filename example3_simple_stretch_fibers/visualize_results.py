@@ -16,6 +16,7 @@ map_quad = chio.map_between_meshes(mesh_quad, mesh)
 
 fibers = chio.read_dfile('out/fibers-1.D')
 mesh.point_data['fibers'] = fibers[:,0:3]
+fibers = fibers[:,0:3]
 
 for i in range(1, 11):
     disp = chio.read_dfile(f'out/Disp-{i}.D')
@@ -23,6 +24,17 @@ for i in range(1, 11):
 
     fibstretch = chio.read_dfile(f'out/FibStretch-{i}.D')
     mesh.point_data['fibstretch'] = fibstretch
+
+    # Read in DefGrad
+
+    # Reshape DefGrad to 3x3
+
+    # Calculate deformed fibers
+
+    # Calculate deformed fiber stretch
+
+    # Add your fibstretch to the mesh
+
 
     io.write(f'out/results-{i}.vtu', mesh)
 
