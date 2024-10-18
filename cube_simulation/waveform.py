@@ -40,10 +40,11 @@ plt.savefig('pressure_waveform.png', bbox_inches='tight')
 
 # Activation traces
 act_0 = np.sin(2 * np.pi * (t-0.35)/0.8) 
-act = act_0 * (act_0 > 0) * (t < 0.8) * act_value
+act_0 = act_0 * (act_0 > 0) * (t < 0.8)
+act_norm = act_0/np.max(act_0)
 
 # Normalizing activation
-act = act/np.max(act)
+act = act_norm * act_value
 
 plt.figure(1, clear=True)
 plt.plot(t, act, 'r', lw = 2, label='activation trace')
