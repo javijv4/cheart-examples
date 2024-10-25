@@ -65,7 +65,6 @@
 !DefVariablePointer={Disp|TP2|3}
 !DefVariablePointer={Pres|TP1|1}
 !DefVariablePointer={Fibers|TP2|9}
-    !SetVariablePointer={Fibers|init_expr|fiber_expr}
 
 
 % ----  Export Frequency  ----------------------------------------------------------------
@@ -120,4 +119,4 @@
 
   !Boundary-patch-definitions                       % Boundary conditions
     1  Disp     dirichlet  0  0  0                  % The patch 1 is fixed in all directions
-    2  Disp.1   scaled_normal  bpres_expr               % The patch 2 is stretched in the X direction 
+    2  Disp     scaled_normal  bpres_expr               % The patch 2 is stretched in the X direction 

@@ -1,0 +1,98 @@
+% ----  File description  -----------------------------------------------------------------
+% This calculates the volume of a single LV
+
+
+% ----    General stuff   -----------------------------------------------------------------
+% This space is use to set general things
+
+#endo = 1                 % Endocardial patch
+
+#outdir = out             % variable to set where the results will be saved. Remember to create the folder !!            
+!SetOutputPath={#outdir}  % CH-command to set where the results will be saved
+
+% time scheme
+#st=1
+#et=9
+#dt=1
+
+% ----  Solver Groups  -------------------------------------------------------------------
+% This is where the solver is defined. The only thing we care for now is the time scheme definition
+
+!DefSolverGroup={SG1|time|SolidMatrix}
+  !SetSolverGroup={SG1|export_initial_condition}
+  !SetSolverGroup={SG1|L2TOL|1e-8}
+  !SetSolverGroup={SG1|L2PERCENT|1e-8}
+  !SetSolverGroup={SG1|AddVariables|Disp|DeformSpace|F}
+!DefSolverSubGroup={SG1|SOLVER_SEQUENTIAL|VolCalc}
+
+!DefTimeStepScheme={time}   % This defines the time scheme
+  #st  #et  #dt             % start timestep, end timestep, timestep increment
+
+
+% ----  Basis Functions  -----------------------------------------------------------------
+!UseBasis={LinBasis|HEXAHEDRAL_ELEMENT|NODAL_LAGRANGE1|GAUSS_LEGENDRE9}
+!UseBasis={QuadBasis|HEXAHEDRAL_ELEMENT|NODAL_LAGRANGE2|GAUSS_LEGENDRE9}
+
+
+% ----  Topologies  ----------------------------------------------------------------------
+!DefTopology={TP1|mesh/ellipsoid|LinBasis}
+!DefTopology={TP2|mesh/ellipsoid_quad|QuadBasis}
+
+
+% --- Interfaces -----------------------------------------------------
+!DefInterface={OneToOne|TP2|TP1}
+
+
+% --- Variables ------------------------------------------------------
+!DefVariablePointer={Space|TP2|mesh/ellipsoid_quad|3}  
+!DefVariablePointer={DeformSpace|TP1|3}
+    !SetVariablePointer={DeformSpace | TEMPORAL_UPDATE_EXPR | space_expr | 1}
+!DefVariablePointer={Disp|TP2|3}
+  !SetVariablePointer={Disp | TEMPORAL_UPDATE_FILE | #outdir/Disp* | 1} % This is used to read-in a file
+!DefVariablePointer={F|TP1|3}
+    !SetVariablePointer={F|TEMPORAL_UPDATE_EXPR|operator|1}
+
+
+% ----  Export Frequency  ----------------------------------------------------------------
+!SetExportFrequency={Space|DeformSpace|F|Disp|-1}
+
+
+% --- Expressions ----------------------------------------------------
+% Expression to update the space
+!DefExpression={space_expr}
+  Space.1 + Disp.1
+  Space.2 + Disp.2
+  Space.3 + Disp.3
+
+!DefExpression={base_normal}
+  0.
+  0.
+  1.
+
+% Expression to calculate the volume in this region
+!DefExpression={mat_expr_lv}
+  0.5 * (1 - base_normal.1 * base_normal.1)
+  0.5 * (0 - base_normal.1 * base_normal.2)
+  0.5 * (0 - base_normal.1 * base_normal.3)
+  0.5 * (0 - base_normal.2 * base_normal.1)
+  0.5 * (1 - base_normal.2 * base_normal.2)
+  0.5 * (0 - base_normal.2 * base_normal.3)
+  0.5 * (0 - base_normal.3 * base_normal.1)
+  0.5 * (0 - base_normal.3 * base_normal.2)
+  0.5 * (1 - base_normal.3 * base_normal.3)
+
+!DefExpression={operator}
+  mat_expr_lv.1 * space_expr.1 + mat_expr_lv.2 * space_expr.2 + mat_expr_lv.3 * space_expr.3
+  mat_expr_lv.4 * space_expr.1 + mat_expr_lv.5 * space_expr.2 + mat_expr_lv.6 * space_expr.3
+  mat_expr_lv.7 * space_expr.1 + mat_expr_lv.8 * space_expr.2 + mat_expr_lv.9 * space_expr.3
+
+
+%  ---  Problem Definition  --------------------------------------------
+!DefProblem={VolCalc|norm_calculation}
+  !UseVariablePointer={Space|DeformSpace}
+  !Absolute-value
+  !Boundary-conditions-not-required
+  !UseVariablePointer={Term1|F|1}
+  !SetRootTopology={TP2}
+  !Boundary-normal={#endo}
+  !Output-filename={volume.norm}
